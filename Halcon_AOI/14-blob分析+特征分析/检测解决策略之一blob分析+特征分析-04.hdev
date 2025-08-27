@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c>* 窗口设置</c>
+<l>dev_close_window ()</l>
+<l>dev_update_off ()</l>
+<c>* 一 模板制作</c>
+<c>* 读取图像</c>
+<l>read_image (ImageOrig, 'blister/blister_reference')</l>
+<c>* 窗口显示设置</c>
+<l>dev_open_window_fit_image (ImageOrig, 0, 0, -1, -1, WindowHandle)</l>
+<l>set_display_font (WindowHandle, 14, 'mono', 'true', 'false')</l>
+<l>dev_set_draw ('margin')</l>
+<l>dev_set_line_width (3)</l>
+<c>* 获取通道1 图像</c>
+<l>access_channel (ImageOrig, Image1, 1)</l>
+<c>* 阈值分割</c>
+<l>threshold (Image1, Region, 90, 255)</l>
+<c>* 进行convex变换</c>
+<l>shape_trans (Region, Blister, 'convex')</l>
+<c>* 获取角度</c>
+<l>orientation_region (Blister, Phi)</l>
+<c>* 获取区域的面积和中心</c>
+<l>area_center (Blister, Area1, Row, Column)</l>
+<c>* 生成仿射变换矩阵</c>
+<l>vector_angle_to_rigid (Row, Column, Phi, Row, Column, 0, HomMat2D)</l>
+<c>* 进行仿射变换</c>
+<l>affine_trans_image (ImageOrig, Image2, HomMat2D, 'constant', 'false')</l>
+<c>* 生成空对象</c>
+<l>gen_empty_obj (Chambers)</l>
+<l>for I := 0 to 4 by 1</l>
+<l>    Row := 88 + I * 70</l>
+<l>    for J := 0 to 2 by 1</l>
+<l>        Column := 163 + J * 150</l>
+<c>        * 生成矩形</c>
+<l>        gen_rectangle2 (Rectangle, Row, Column, 0, 64, 30)</l>
+<c>        * 连结矩形</c>
+<l>        concat_obj (Chambers, Rectangle, Chambers)</l>
+<l>    endfor</l>
+<l>endfor</l>
+<c>* 对区域进行仿射变换</c>
+<l>affine_trans_region (Blister, Blister, HomMat2D, 'nearest_neighbor') </l>
+<c>* 区域相减</c>
+<l>difference (Blister, Chambers, Pattern)</l>
+<c>* 区域合并</c>
+<l>union1 (Chambers, ChambersUnion)</l>
+<c>* 获取角度变换</c>
+<l>orientation_region (Blister, PhiRef)</l>
+<c>* 加180</c>
+<l>PhiRef := rad(180) + PhiRef</l>
+<c>* 获取区域的中心和面积</c>
+<l>area_center (Blister, Area2, RowRef, ColumnRef)</l>
+<c>* 遍历</c>
+<l>Count := 6</l>
+<l>for Index := 1 to Count by 1</l>
+<c>    * 读取图像</c>
+<c>    * 1.读取图像</c>
+<l>    read_image (Image, 'blister/blister_' + Index$'02')</l>
+<c>    *  阈值分割（Blob定位）</c>
+<l>    threshold (Image, Region, 90, 255)</l>
+<c>    * 连通</c>
+<l>    connection (Region, ConnectedRegions)</l>
+<c>    * 根据面积选取区域</c>
+<l>    select_shape (ConnectedRegions, SelectedRegions, 'area', 'and', 5000, 9999999)</l>
+<c>    * 进行convex变换</c>
+<l>    shape_trans (SelectedRegions, RegionTrans, 'convex')</l>
+<c>    * 获取角度</c>
+<l>    orientation_region (RegionTrans, Phi)</l>
+<c>    * 获取面积和中心</c>
+<l>    area_center (RegionTrans, Area3, Row, Column)</l>
+<c>    * 生成仿射矩阵</c>
+<l>    vector_angle_to_rigid (Row, Column, Phi, RowRef, ColumnRef, PhiRef, HomMat2D)</l>
+<c>    * 图像进行仿射变换</c>
+<l>    affine_trans_image (Image, ImageAffineTrans, HomMat2D, 'constant', 'false')</l>
+<c>    * 获取区域图像（重要）3.获取ROI(感兴趣)区域</c>
+<l>    reduce_domain (ImageAffineTrans, ChambersUnion, ImageReduced)</l>
+<c>    * 图像分解成三个通道* 4.图像预处理</c>
+<l>    decompose3 (ImageReduced, ImageR, ImageG, ImageB)</l>
+<c>    * 对B通道进行阈值分割5.图像算法处理</c>
+<c>    * mean</c>
+<l>    var_threshold (ImageB, Region, 7, 7, 0.2, 2, 'dark')</l>
+<c>    * 连通</c>
+<l>    connection (Region, ConnectedRegions0)</l>
+<c>    * 闭运算</c>
+<l>    closing_rectangle1 (ConnectedRegions0, ConnectedRegions, 3, 3)</l>
+<c>    * 填充</c>
+<l>    fill_up (ConnectedRegions, RegionFillUp)</l>
+<c>    * 根据面积选取区域</c>
+<l>    select_shape (RegionFillUp, SelectedRegions, 'area', 'and', 1000, 99999)</l>
+<c>    * 开运算</c>
+<l>    opening_circle (SelectedRegions, RegionOpening, 4.5)</l>
+<c>    * 连通</c>
+<l>    connection (RegionOpening, ConnectedRegions)</l>
+<c>    * 根据面积选取区域</c>
+<l>    select_shape (ConnectedRegions, SelectedRegions, 'area', 'and', 1000, 99999)</l>
+<c>    * 进行convex变换</c>
+<l>    shape_trans (SelectedRegions, Pills, 'convex')</l>
+<c>    * 计数</c>
+<l>    count_obj (Chambers, Number)</l>
+<c>    * 生成空对象</c>
+<l>    gen_empty_obj (WrongPill)</l>
+<c>    * 生成空对象</c>
+<l>    gen_empty_obj (MissingPill)</l>
+<c>    * 遍历6.结果输出</c>
+<l>    for I := 1 to Number by 1</l>
+<c>        * 选取对象</c>
+<l>        select_obj (Chambers, Chamber, I)</l>
+<c>        * 交集</c>
+<l>        intersection (Chamber, Pills, Pill)</l>
+<c>        * 获取区域中心和面积</c>
+<l>        area_center (Pill, Area, Row1, Column1)</l>
+<c>        * 面积大于0</c>
+<l>        if (Area &gt; 0)</l>
+<c>            * 湖区灰度值的最值和范围</c>
+<l>            min_max_gray (Pill, ImageB, 0, Min, Max, Range)</l>
+<l>            if (Area &lt; 3800 or Min &lt; 60)</l>
+<c>                * 连结对象</c>
+<l>                concat_obj (WrongPill, Pill, WrongPill)</l>
+<l>            endif</l>
+<l>        else</l>
+<c>            * 连结对象</c>
+<l>            concat_obj (MissingPill, Chamber, MissingPill)</l>
+<l>        endif</l>
+<l>    endfor</l>
+<c>    * 显示结果</c>
+<l>    dev_clear_window ()</l>
+<l>    dev_display (ImageAffineTrans)</l>
+<l>    dev_set_color ('forest green')</l>
+<l>    count_obj (Pills, NumberP)</l>
+<l>    count_obj (WrongPill, NumberWP)</l>
+<l>    count_obj (MissingPill, NumberMP)</l>
+<l>    dev_display (Pills)</l>
+<l>    if (NumberMP &gt; 0 or NumberWP &gt; 0)</l>
+<l>        disp_message (WindowHandle, 'Not OK', 'window', 12, 12 + 600, 'red', 'true')</l>
+<l>    else</l>
+<l>        disp_message (WindowHandle, 'OK', 'window', 12, 12 + 600, 'forest green', 'true')</l>
+<l>    endif</l>
+<c>    * </c>
+<l>    Message := '# Correct pills: ' + (NumberP - NumberWP)</l>
+<l>    Message[1] := '# Wrong pills  :  ' + NumberWP</l>
+<l>    Message[2] := '# Missing pills:  ' + NumberMP</l>
+<c>    * </c>
+<l>    Colors := gen_tuple_const(3,'black')</l>
+<l>    if (NumberWP &gt; 0)</l>
+<l>        Colors[1] := 'red'</l>
+<l>    endif</l>
+<l>    if (NumberMP &gt; 0)</l>
+<l>        Colors[2] := 'red'</l>
+<l>    endif</l>
+<l>    disp_message (WindowHandle, Message, 'window', 12, 12, Colors, 'true')</l>
+<l>    dev_set_color ('red')</l>
+<l>    dev_display (WrongPill)</l>
+<l>    dev_display (MissingPill)</l>
+<l>    if (Index &lt; Count)</l>
+<l>        disp_continue_message (WindowHandle, 'black', 'true')</l>
+<l>    endif</l>
+<l>    stop ()</l>
+<l>endfor</l>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

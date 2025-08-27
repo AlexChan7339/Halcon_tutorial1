@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="25.05.0.0">
+<procedure name="main">
+<interface/>
+<body>
+<c>* 获取窗口</c>
+<c></c>
+<l>dev_get_window (WindowHandle)</l>
+<c></c>
+<c></c>
+<c>*** 一 绘制区域</c>
+<c>* 绘制矩阵1</c>
+<l>draw_rectangle1 (WindowHandle, Row1, Column1, Row2, Column2)</l>
+<l>gen_rectangle1 (Rectangle, Row1, Column1, Row2, Column2)</l>
+<c></c>
+<c>* 绘制矩形2</c>
+<c></c>
+<l>draw_rectangle2 (WindowHandle, Row, Column, Phi, Length1, Length2)</l>
+<l>gen_rectangle2 (Rectangle1, Row, Column, Phi, Length1, Length2)</l>
+<c></c>
+<c>* 绘制圆</c>
+<l>draw_circle (WindowHandle, Row3, Column3, Radius)</l>
+<l>gen_circle (Circle, Row3, Column3, Radius)</l>
+<c></c>
+<c>* 绘制椭圆</c>
+<l>draw_ellipse (WindowHandle, Row4, Column4, Phi1, Radius1, Radius2)</l>
+<l>gen_ellipse (Ellipse, Row4, Column4, Phi1, Radius1, Radius2)</l>
+<c></c>
+<c>* 画直线</c>
+<l>draw_line (WindowHandle, Row11, Column11, Row21, Column21)</l>
+<l>gen_region_line (RegionLines, Row11, Column11, Row21, Column21)</l>
+<c></c>
+<c></c>
+<c>* 绘制任意区域</c>
+<l>draw_region (Region, WindowHandle)</l>
+<c></c>
+<c></c>
+<c>*** 二 区域的形态学操作</c>
+<c>* 腐蚀</c>
+<l>erosion_circle (Region, RegionErosion, 3.5)</l>
+<l>erosion_rectangle1 (RegionErosion, RegionErosion1, 3, 3)</l>
+<c></c>
+<c>* 膨胀</c>
+<l>dilation_circle (RegionErosion1, RegionDilation, 3.5)</l>
+<l>dilation_rectangle1 (RegionDilation, RegionDilation1, 11, 11)</l>
+<c></c>
+<c></c>
+<c>*** 三 区域之间的交集，并集，差集，补集等</c>
+<c>* 区域之间的交集</c>
+<l>dev_clear_window ()</l>
+<c>* 绘制任意区域</c>
+<l>draw_region (Region1, WindowHandle)</l>
+<c>* 绘制任意区域</c>
+<l>draw_region (Region2, WindowHandle)</l>
+<c></c>
+<l>intersection (Region1, Region2, RegionIntersection)</l>
+<c></c>
+<c></c>
+<c>* 区域之间的差集</c>
+<c></c>
+<l>difference (Region1, Region2, RegionDifference)</l>
+<c></c>
+<c>* 区域的并集</c>
+<l>union2 (Region1, Region2, RegionUnion)</l>
+<c></c>
+<c>* 补集</c>
+<l>complement (Region1, RegionComplement)</l>
+<c></c>
+<c></c>
+<c>*** 四 区域形状的变换</c>
+<l>shape_trans (Region1, RegionTrans, 'convex')</l>
+<l>shape_trans (Region1, RegionTrans, 'rectangle1')</l>
+<l>shape_trans (Region1, RegionTrans0, 'rectangle2')</l>
+<l>shape_trans (Region1, RegionTrans1, 'inner_circle')</l>
+<l>shape_trans (Region1, RegionTrans2, 'outer_circle')</l>
+<c></c>
+<c></c>
+<c></c>
+<c>*** 五 移动区域</c>
+<l>move_region (Region1, RegionMoved, 100, 100)</l>
+<c></c>
+<c></c>
+<c>*** 六 放射变换，移动和旋转区域</c>
+<c>* 生成变换变换矩阵</c>
+<l>vector_angle_to_rigid(0, 0, 0, 0, -100, 3.1415, HomMat2D)</l>
+<c>* 对区域进行移动</c>
+<l>affine_trans_region(Region1, RegionAffineTrans, HomMat2D, 'false')</l>
+<c></c>
+<c>* 生成变换变换矩阵</c>
+<l>vector_angle_to_rigid(0, 0, 0, 100, 0, rad(90), HomMat2D)</l>
+<c>* 对区域进行移动</c>
+<l>affine_trans_region(Region1, RegionAffineTrans, HomMat2D, 'false')</l>
+<c></c>
+<c></c>
+<c>* 角度变换</c>
+<c>* 获取旋转中心</c>
+<l>area_center (RegionMoved, Area, Row5, Column5)</l>
+<c>* 生成对应旋转变换矩阵</c>
+<l>vector_angle_to_rigid (Row5, Column5, rad(-90), Row5-150, Column5, 0, HomMat2D1)</l>
+<c>* 使用变换矩阵进行旋转</c>
+<l>affine_trans_region (RegionMoved, RegionAffineTrans1, HomMat2D1, 'nearest_neighbor')</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

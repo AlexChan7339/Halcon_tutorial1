@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="20.11.1.2">
+<procedure name="main">
+<interface/>
+<body>
+<c>* 打开图像选择弹窗</c>
+<l>dev_open_file_dialog ('read_image', 'default', 'default', Selection)</l>
+<c></c>
+<c>* 根据路径读取图像</c>
+<l>read_image (Image, Selection)</l>
+<c></c>
+<c>* rgb转灰度图</c>
+<l>rgb1_to_gray (Image, GrayImage)</l>
+<c></c>
+<c>* 分解三通道</c>
+<l>decompose3 (Image, R, G, B)</l>
+<c></c>
+<c>* RGB转HSV</c>
+<l>trans_from_rgb (R,G, B, H, S, V, 'hsv')</l>
+<c></c>
+<c></c>
+<c>* 获取图像宽</c>
+<l>get_image_size (GrayImage, Width, Height)</l>
+<c></c>
+<c></c>
+<c>* 生成单通道空图像</c>
+<l>gen_image_const (Image1, 'byte', Width, Height)</l>
+<c></c>
+<c>*生成某固定值的单通道图像</c>
+<l>gen_image_proto (Image1, ImageOut, 125)</l>
+<l>gen_image_proto (Image1, ImageOut2, 255)</l>
+<c></c>
+<c></c>
+<c>* 获取灰度图的灰度值</c>
+<l>get_grayval (GrayImage, [0,1], [0,1], Grayval)</l>
+<c></c>
+<c>* 修改灰度值(单像素修改)</c>
+<l>set_grayval (ImageOut, 1, 1, 255)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

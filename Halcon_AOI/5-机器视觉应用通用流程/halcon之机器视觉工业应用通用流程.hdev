@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="25.05.0.0">
+<procedure name="main">
+<interface/>
+<body>
+<c>******************************************************************</c>
+<c>************************* 工业视觉应用一般流程 *********************</c>
+<c>******************************************************************</c>
+<c>****************************** 0.参数设置 ******************************</c>
+<c>* 获取窗口句柄（句柄可以代表窗口）</c>
+<l>dev_get_window (WindowHandle)</l>
+<c>* 缺陷的最小面积</c>
+<l>minDefectArea :=200</l>
+<c>****************************** 1.读取图像 ******************************</c>
+<c>* 读取图像</c>
+<l>read_image (Image, '1.bmp')</l>
+<c></c>
+<c>****************************** 2.定位（Blob分析） *********************************</c>
+<c>*** 定位内圆</c>
+<c>* &lt;2.1&gt; 阈值分割</c>
+<l>threshold (Image, Region, 130, 255)</l>
+<c>* &lt;2.2&gt; 连通</c>
+<l>connection (Region, ConnectedRegions)</l>
+<c>* &lt;2.3&gt; 填充</c>
+<l>fill_up (ConnectedRegions, RegionFillUp)</l>
+<c>* &lt;2.4&gt; 通过特征筛选特征区域</c>
+<c>* 选取最大的区域</c>
+<l>select_shape_std (RegionFillUp, SelectedRegions, 'max_area', 70)</l>
+<c></c>
+<c></c>
+<c>****************************** 3.获取ROI（感兴趣）区域 ******************</c>
+<c>* 拟合最小外接圆</c>
+<l>smallest_circle (SelectedRegions, Row, Column, Radius)</l>
+<c>* 生成圆区域</c>
+<l>gen_circle (ROIRegion, Row, Column, Radius)</l>
+<c>* 修整，去除干扰区域</c>
+<l>erosion_circle (ROIRegion, RegionErosion1, 15)</l>
+<c>* 获取区域对应的图像</c>
+<l>reduce_domain (Image, RegionErosion1, ImageReduced)</l>
+<c></c>
+<c></c>
+<c>****************************** 4.图像预处理(缺陷进行凸显) *****************************</c>
+<c>* 图像增强：亮的更亮，暗的更暗，增强对比度</c>
+<l>mult_image (ImageReduced, ImageReduced, ImageResult, 0.008, 0)</l>
+<c></c>
+<c>****************************** 5.图像算法处理 ***************************</c>
+<c>* &lt;5.1 图像分割&gt;</c>
+<c>* 核心：缺陷提取</c>
+<l>threshold (ImageResult, Region1, 0, 180)</l>
+<c>* 打散</c>
+<l>connection (Region1, ConnectedRegions1)</l>
+<c>* 根据面积选取特征区域</c>
+<l>select_shape (ConnectedRegions1, SelectedRegions1, 'area', 'and', minDefectArea, 99999)</l>
+<c></c>
+<c>****************************** 6.结果输出 *******************************</c>
+<l>count_obj (SelectedRegions1, Number)</l>
+<l>if(Number&gt;0)</l>
+<c>    * 设置显示文本颜色</c>
+<l>    dev_set_color ('red')</l>
+<l>    Text := 'NG'</l>
+<c>    * 显示缺陷区域</c>
+<l>    dev_display (SelectedRegions1)</l>
+<c>    * 显示文本</c>
+<l>    disp_message (WindowHandle, Text, 'window', 12, 12, '', 'false')</l>
+<l>endif</l>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

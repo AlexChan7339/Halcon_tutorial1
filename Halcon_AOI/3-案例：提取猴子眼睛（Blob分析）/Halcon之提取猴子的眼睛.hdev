@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="25.05.0.0">
+<procedure name="main">
+<interface/>
+<body>
+<c>* 读取图像</c>
+<l>read_image (Image, 'monkey')</l>
+<l>MyFunction (Image, RegionUnion, Area)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+<procedure name="MyFunction">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="RegionUnion" base_type="iconic" dimension="0"/>
+</oo>
+<oc>
+<par name="Area" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c>* 阈值分割</c>
+<l>threshold (Image, Region, 130, 255)</l>
+<c>* 填充</c>
+<l>fill_up (Region, RegionFillUp)</l>
+<c>* 打散</c>
+<l>connection (RegionFillUp, ConnectedRegions)</l>
+<c>* 筛选</c>
+<l>select_shape (ConnectedRegions, SelectedRegions, 'area', 'and', 800, 1000)</l>
+<c>* 腐蚀（去除杂质）</c>
+<l>erosion_circle (SelectedRegions, RegionErosion, 3.5)</l>
+<c>* 膨胀（去除杂质）</c>
+<l>dilation_circle (RegionErosion, RegionDilation, 3.5)</l>
+<c>* 合并</c>
+<l>union1 (RegionDilation, RegionUnion)</l>
+<c></c>
+<c>* 获取眼球区域的面积和中心点左边</c>
+<l>area_center (RegionUnion, Area, row, column)</l>
+<l>return ()</l>
+</body>
+<docu id="MyFunction">
+<parameters>
+<parameter id="Area"/>
+<parameter id="Image"/>
+<parameter id="RegionUnion"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

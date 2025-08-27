@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c>* 读取图像</c>
+<l>read_image (Image, 'surface_scratch')</l>
+<c>* 均值滤波</c>
+<l>mean_image (Image, ImageMean, 7, 7)</l>
+<c>* 动态阈值分割</c>
+<l>dyn_threshold (Image, ImageMean, DarkPixels, 5, 'dark')</l>
+<c>* 连通</c>
+<l>connection (DarkPixels, ConnectedRegions)</l>
+<c>* 去杂志</c>
+<l>select_shape (ConnectedRegions, SelectedRegions, 'area', 'and', 10, 1000)</l>
+<c>* 合并</c>
+<l>union1 (SelectedRegions, RegionUnion)</l>
+<c>* 膨胀（更好的提取骨干）</c>
+<l>dilation_circle (RegionUnion, RegionDilation, 3.5)</l>
+<c>* 获取骨干（重要技巧）</c>
+<l>skeleton (RegionDilation, Skeleton)</l>
+<c>* 连通</c>
+<l>connection (Skeleton, Errors)</l>
+<c>* 通过面积选取划伤</c>
+<l>select_shape (Errors, Scratches, 'area', 'and', 50, 10000)</l>
+<c>* 通过面积选取点状缺陷</c>
+<l>select_shape (Errors, Dots, 'area', 'and', 1, 50)</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

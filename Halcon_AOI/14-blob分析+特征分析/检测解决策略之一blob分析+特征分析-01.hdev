@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.11.0.1">
+<procedure name="main">
+<interface/>
+<body>
+<c></c>
+<c>* 读取图像</c>
+<l>read_image (Image, 'food/hazelnut_wafer_01')</l>
+<c>****************************************一 窗口显示设置*************************************************************</c>
+<c>* 关闭窗口</c>
+<l>dev_close_window ()</l>
+<c>* 打开窗口</c>
+<l>dev_open_window_fit_image (Image, 0, 0, -1, -1, WindowHandle)</l>
+<c>* 关闭更新</c>
+<l>dev_update_window ('off')</l>
+<c>* 设置显示线宽</c>
+<l>dev_set_line_width (3)</l>
+<c>* 设置显示模式为边缘模式：margin</c>
+<l>* dev_set_draw ('margin')</l>
+<c>* 设置显示字体大小</c>
+<l>set_display_font (WindowHandle, 20, 'mono', 'true', 'false')</l>
+<c>****************************************二 算法处理：策略：Blob分析+特征（孔洞的面积和矩形度）分析*************************************************************</c>
+<c></c>
+<c></c>
+<c>* 遍历缺陷图片</c>
+<l>for Index := 1 to 24 by 1</l>
+<c>    * 1.采集图像</c>
+<c></c>
+<l>    read_image (Image, 'food/hazelnut_wafer_' + Index$'.02')</l>
+<c>    *2.图像分割： 二值化分割</c>
+<c></c>
+<l>    binary_threshold (Image, Foreground, 'smooth_histo', 'light', UsedThreshold)</l>
+<c>    *3.形态学处理 开运算（腐蚀）</c>
+<c></c>
+<l>    opening_circle (Foreground, FinalRegion, 8.5)</l>
+<c>    </c>
+<c>    * 计算孔洞面积</c>
+<l>    area_holes (FinalRegion, AreaHoles)</l>
+<c>    * 计算矩形度</c>
+<l>    rectangularity (FinalRegion, Rectangularity)</l>
+<c>    * 显示图像</c>
+<l>    dev_display (Image)</l>
+<c>    * 用孔洞面积和矩形度特征，来判断NG/OK</c>
+<l>    if (AreaHoles &gt; 300 or Rectangularity &lt; 0.92)</l>
+<c>        * 设置显示颜色为红色</c>
+<l>        dev_set_color ('red')</l>
+<l>        Text := 'NG'</l>
+<l>    else</l>
+<l>        dev_set_color ('forest green')</l>
+<l>        Text := 'OK'</l>
+<l>    endif</l>
+<c>    * 显示缺陷区域</c>
+<l>    dev_display (FinalRegion)</l>
+<c>    * 显示文本</c>
+<l>    disp_message (WindowHandle, Text, 'window', 12, 12, '', 'false')</l>
+<l>    if (Index &lt; 24)</l>
+<c>        *在屏幕右下角显示“单击“运行”以继续”</c>
+<l>        disp_continue_message (WindowHandle, 'black', 'true')</l>
+<l>        stop ()</l>
+<l>    endif</l>
+<l>endfor</l>
+<c></c>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
